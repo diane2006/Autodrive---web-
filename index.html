@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoDrive · Panamá</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="plate-strip" aria-hidden="true">
+  <span>DISPONIBLE</span><span>·</span><span>RESERVADO</span><span>·</span><span>VENDIDO</span><span>·</span>
+  <span>DISPONIBLE</span><span>·</span><span>RESERVADO</span><span>·</span><span>VENDIDO</span><span>·</span>
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">AD</span>
+    <div class="brand-text">
+      <h1>AutoDrive</h1>
+      <p>Gestión de concesionario — Panamá</p>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="dashboard">Panel</button>
+    <button class="tab" data-view="inventory">Inventario</button>
+    <button class="tab" data-view="sales">Ventas</button>
+  </nav>
+  <div class="storage-pill" title="Los datos se guardan en este navegador">
+    <span class="dot"></span> Local · sin servidor todavía
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <div class="stat-grid">
+      <div class="stat-card">
+        <span class="stat-label">Vehículos en lote</span>
+        <span class="stat-value" data-odometer data-target="0" id="stat-total">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Disponibles</span>
+        <span class="stat-value" data-odometer data-target="0" id="stat-available">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Vendidos este registro</span>
+        <span class="stat-value" data-odometer data-target="0" id="stat-sold">0</span>
+      </div>
+      <div class="stat-card wide">
+        <span class="stat-label">Valor total del inventario</span>
+        <span class="stat-value money" id="stat-value">$0</span>
+      </div>
+    </div>
+
+    <div class="panel-row">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Últimos movimientos</h2>
+        </div>
+        <ul class="activity-list" id="activity-list">
+          <li class="empty">Aún no hay actividad. Agrega un vehículo o registra una venta.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Lote destacado</h2>
+          <span class="hint">Los 3 más recientes</span>
+        </div>
+        <div class="mini-cars" id="mini-cars"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INVENTORY -->
+  <section class="view" id="view-inventory">
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Buscar por marca, modelo o placa...">
+      </div>
+      <div class="filter-group" id="status-filter">
+        <button class="chip active" data-status="todos">Todos</button>
+        <button class="chip" data-status="disponible">Disponible</button>
+        <button class="chip" data-status="reservado">Reservado</button>
+        <button class="chip" data-status="vendido">Vendido</button>
+      </div>
+      <button class="btn-primary" id="btn-new-car">+ Agregar vehículo</button>
+    </div>
+    <div class="car-grid" id="car-grid"></div>
+    <p class="empty-state" id="inventory-empty" hidden>No hay vehículos que coincidan. Ajusta la búsqueda o agrega uno nuevo.</p>
+  </section>
+
+  <!-- SALES -->
+  <section class="view" id="view-sales">
+    <div class="toolbar">
+      <h2 class="section-title">Registro de ventas</h2>
+      <button class="btn-primary" id="btn-new-sale">+ Registrar venta</button>
+    </div>
+    <div class="table-wrap">
+      <table class="sales-table" id="sales-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Vehículo</th>
+            <th>Placa</th>
+            <th>Comprador</th>
+            <th>Precio de venta</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="sales-body"></tbody>
+      </table>
+      <p class="empty-state" id="sales-empty" hidden>Todavía no se ha registrado ninguna venta.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL: nuevo/editar vehiculo -->
+<div class="modal-backdrop" id="car-modal-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="car-modal-title">Agregar vehículo</h3>
+      <button class="icon-btn" data-close>&times;</button>
+    </div>
+    <form id="car-form">
+      <input type="hidden" id="car-id">
+      <div class="form-grid">
+        <label>Marca
+          <input type="text" id="car-brand" required placeholder="Toyota">
+        </label>
+        <label>Modelo
+          <input type="text" id="car-model" required placeholder="Corolla">
+        </label>
+        <label>Año
+          <input type="number" id="car-year" required min="1980" max="2027" placeholder="2022">
+        </label>
+        <label>Placa
+          <input type="text" id="car-plate" required placeholder="AB-1234" style="text-transform:uppercase">
+        </label>
+        <label>Precio (USD)
+          <input type="number" id="car-price" required min="0" step="1" placeholder="18500">
+        </label>
+        <label>Kilometraje
+          <input type="number" id="car-mileage" min="0" step="1" placeholder="12000">
+        </label>
+        <label>Color
+          <input type="text" id="car-color" placeholder="Gris plata">
+        </label>
+        <label>Estado
+          <select id="car-status">
+            <option value="disponible">Disponible</option>
+            <option value="reservado">Reservado</option>
+            <option value="vendido">Vendido</option>
+          </select>
+        </label>
+      </div>
+      <label class="full">Notas
+        <textarea id="car-notes" rows="2" placeholder="Detalles adicionales, dueño anterior, condición..."></textarea>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" data-close>Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar vehículo</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: nueva venta -->
+<div class="modal-backdrop" id="sale-modal-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Registrar venta</h3>
+      <button class="icon-btn" data-close>&times;</button>
+    </div>
+    <form id="sale-form">
+      <div class="form-grid">
+        <label class="full">Vehículo
+          <select id="sale-car" required></select>
+        </label>
+        <label>Comprador
+          <input type="text" id="sale-buyer" required placeholder="Nombre del comprador">
+        </label>
+        <label>Fecha
+          <input type="date" id="sale-date" required>
+        </label>
+        <label>Precio de venta (USD)
+          <input type="number" id="sale-price" required min="0" step="1">
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" data-close>Cancelar</button>
+        <button type="submit" class="btn-primary">Confirmar venta</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
